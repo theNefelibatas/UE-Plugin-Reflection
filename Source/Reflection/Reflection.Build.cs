@@ -155,7 +155,11 @@ public class Reflection : ModuleRules {
 			/* Only Unreal Engine 5 */
 
 			"AnimationDataController",
-			"ToolWidgets"
+			"ToolWidgets",
+
+			/* FPhysicsAssetUtils::CreateFromSkeletalMesh, the fallback that
+			 * generates bodies when a game export carries no SkeletalBodySetups */
+			"PhysicsUtilities"
 #endif
 		});
 		

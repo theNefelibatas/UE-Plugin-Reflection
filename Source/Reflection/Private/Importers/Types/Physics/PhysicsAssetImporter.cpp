@@ -7,6 +7,11 @@
 #include "Settings/Runtime.h"
 #include "Utilities/JsonHelpers.h"
 
+#if UE5_1_BEYOND
+#include "Engine/Log.h"
+#include "PhysicsAssetUtils.h"
+#endif
+
 UObject* IPhysicsAssetImporter::CreateAsset(UObject* CreatedAsset) {
 	return IImporter::CreateAsset(NewObject<UPhysicsAsset>(GetPackage(), UPhysicsAsset::StaticClass(), *GetAssetName(), RF_Public | RF_Standalone));
 }
@@ -111,6 +116,28 @@ bool IPhysicsAssetImporter::Import() {
 		}
 	}
 	
+#if UE5_1_BEYOND
+	/* Game exports carry no bodies (cooked games strip them); generate them from the
+	 * skeleton so the imported constraints bind to real bodies. 5.1+ only — UE4/5.0
+	 * use a different API shape. */
+	if (SkeletalMesh && PhysicsAsset->SkeletalBodySetups.Num() == 0) {
+		/* The JSON carries the real joints; the importer only sets PreviewSkeletalMesh */
+		FPhysAssetCreateParams Params;
+		Params.bCreateConstraints = false;
+
+		FText ErrorMessage;
+		if (!FPhysicsAssetUtils::CreateFromSkeletalMesh(PhysicsAsset, SkeletalMesh, Params, ErrorMessage, /*bSetToMesh=*/false, /*bShowProgress=*/false)) {
+			UE_LOG(LogReflection, Warning, TEXT("\"%s\": failed to generate bodies from \"%s\": %s"), *GetAssetName(), *SkeletalMesh->GetName(), *ErrorMessage.ToString());
+		}
+
+		/* Constraints resolve by bone name; map the new bodies so they bind.
+		 * The call rebuilt CollisionDisableTable from overlaps — the JSON indices
+		 * referred to the game's removed bodies and are meaningless here. */
+		PhysicsAsset->UpdateBodySetupIndexMap();
+		PhysicsAsset->UpdateBoundsBodiesArray();
+	}
+#endif
+
 	if (SkeletalMesh) {
 		PhysicsAsset->PreviewSkeletalMesh = SkeletalMesh;
 		PhysicsAsset->PostEditChange();
