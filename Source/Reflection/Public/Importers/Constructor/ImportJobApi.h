@@ -19,4 +19,12 @@ public:
 	 * the importer registry */
 	UFUNCTION(BlueprintCallable, Category = "Reflection")
 	static bool CanImportType(const FString& Type);
+
+	/* Attaches (slot index -> material asset path) to a skeletal mesh's material slots
+	 * and saves the package. Python cannot write SkeletalMesh material slots (the
+	 * material_interface field is read-only in the binding), so the import pipeline
+	 * calls this after materials are imported. Paths must already be verified by the
+	 * caller; missing slots/materials are skipped. */
+	UFUNCTION(BlueprintCallable, Category = "Reflection")
+	static bool AttachMeshMaterials(const FString& MeshPath, const TMap<int32, FString>& SlotMaterials);
 };
