@@ -39,6 +39,13 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category = Settings)
 	FRMaterialSettings Material;
 
+	/* Project name that prefixes game package paths; path mapping replaces
+	* <ProjectName>/Content/ with /Game/ and <ProjectName>/Plugins with empty
+	* (ToEditorPackagePath in Utilities/AssetPaths.h). Local imports configure
+	* it here, Cloud imports take it from the selected profile */
+	UPROPERTY(EditAnywhere, Config, Category = Settings)
+	FString ProjectName;
+
 	UPROPERTY(EditAnywhere, Config, Category = Settings)
 	FRStaticMeshSettings StaticMesh;
 

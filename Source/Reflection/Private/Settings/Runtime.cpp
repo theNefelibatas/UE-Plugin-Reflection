@@ -5,6 +5,7 @@
 #include "Misc/FileHelper.h"
 #include "Engine/EngineUtilities.h"
 #include "Utilities/JsonHelpers.h"
+#include "Settings/SettingsAccess.h"
 
 /* Define Global Struct */
 FRRuntime GReflectionRuntime;
@@ -32,4 +33,10 @@ void FRRuntime::Update() {
 	}
 
 	GReflectionRuntime.bEnableToolbarToggling = GetPlugin(GReflectionInternalName.ToString()) != nullptr;
+
+	/* The Cloud profile carries the project name package paths are spelled with; local
+	 * imports never pick a profile, so fall back to the plugin setting */
+	if (GReflectionRuntime.Profile.ProjectName.IsEmpty()) {
+		GReflectionRuntime.Profile.ProjectName = GetSettings()->AssetSettings.ProjectName;
+	}
 }
