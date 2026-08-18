@@ -7,6 +7,12 @@
 #include "Engine/Compatibility.h"
 
 bool CanImport(const FString& Type, const bool IsCloud, const UClass* Class) {
+	// AnimSequence is imported by the UEFormat factory (.ueanim); matching the Cloud
+	// blacklist, local imports exclude it as well
+	if (Type == "AnimSequence") {
+		return false;
+	}
+
 	if (IsCloud) {
 		if (!ImportTypes::Cloud::Allowed(Type)) {
 			return false;
