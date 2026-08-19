@@ -105,7 +105,11 @@ static void ReportDna(USkeletalMesh* Mesh, const TCHAR* Prefix) {
 		const FString& DnaFileName = DNAAsset->DnaFileName;
 #endif
 
+#if UE5_8_BEYOND
+		const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetDNAReader();
+#else
 		const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetBehaviorReader();
+#endif
 
 		if (!Behavior.IsValid()) {
 			UE_LOG(LogRigImportTest, Display, TEXT("%s dna '%s': no behavior"), Prefix, *DnaFileName);
@@ -184,7 +188,11 @@ static void ReportDnaNeutral(USkeletalMesh* Mesh) {
 	UDNAAsset* DNAAsset = USkelMeshDNAUtils::GetMeshDNA(Mesh);
 	if (DNAAsset == nullptr) return;
 
+#if UE5_8_BEYOND
+	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetDNAReader();
+#else
 	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetBehaviorReader();
+#endif
 	if (!Behavior.IsValid()) return;
 
 	FRigLogic RigLogic(Behavior.Get());
@@ -337,7 +345,11 @@ static void ComparePoseAssetToRig(USkeletalMesh* Mesh, const FString& PoseAssetP
 	UDNAAsset* DNAAsset = USkelMeshDNAUtils::GetMeshDNA(Mesh);
 	if (DNAAsset == nullptr) return;
 
+#if UE5_8_BEYOND
+	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetDNAReader();
+#else
 	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetBehaviorReader();
+#endif
 	if (!Behavior.IsValid()) return;
 
 	static const TCHAR* Wanted[] = { TEXT("jawOpen"), TEXT("browDownL"), TEXT("browRaiseInL"), TEXT("eyeBlinkL") };
@@ -551,7 +563,11 @@ static void ReportControlDirections(USkeletalMesh* Mesh, UAnimBlueprint* AnimBlu
 	UDNAAsset* DNAAsset = USkelMeshDNAUtils::GetMeshDNA(Mesh);
 	if (DNAAsset == nullptr) return;
 
+#if UE5_8_BEYOND
+	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetDNAReader();
+#else
 	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetBehaviorReader();
+#endif
 	if (!Behavior.IsValid()) return;
 
 	/* A handful whose direction is obvious to anyone looking at a face */

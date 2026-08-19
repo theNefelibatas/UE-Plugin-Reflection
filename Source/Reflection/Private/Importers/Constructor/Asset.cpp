@@ -275,7 +275,7 @@ bool FAssetUtilities::ConstructAsset(const FString& Path, const FString& RealPat
 			UTexture* Texture = nullptr;
 
 			bSuccess = FTextureImport::FromCloud(RealPath, Path, Texture);
-			if (bSuccess) OutObject = Cast<T>(Texture);
+			if (bSuccess) OutObject = Cast<T>(static_cast<UObject*>(Texture));
 
 			return true;
 		}

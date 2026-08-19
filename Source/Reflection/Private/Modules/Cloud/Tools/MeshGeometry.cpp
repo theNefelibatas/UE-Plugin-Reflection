@@ -276,7 +276,15 @@ int32 TMeshGeometry::RebuildLodModels(USkeletalMesh* SkeletalMesh, const TShared
 		}
 
 
+#if UE5_6_BEYOND
+		FMeshDescription MeshDescription;
+		if (ImportData.GetMeshDescription(nullptr, &SkeletalMesh->GetLODInfo(LodIndex)->BuildSettings, MeshDescription)) {
+			SkeletalMesh->CreateMeshDescription(LodIndex, MoveTemp(MeshDescription));
+			SkeletalMesh->CommitMeshDescription(LodIndex);
+		}
+#else
 		SkeletalMesh->SaveLODImportedData(LodIndex, ImportData);
+#endif
 
 		/* BuildLODModel skips a LOD it thinks was generated from a lower one, and an importer that
 		 * set this leaves the new source data unread. Cleared here, the same way a real build
@@ -307,7 +315,11 @@ int32 TMeshGeometry::RebuildLodModels(USkeletalMesh* SkeletalMesh, const TShared
 	/* AddLODInfo appends, so bringing the source models up can leave an info the geometry has no
 	 * LOD for. Those are dropped rather than left as an empty LOD on the mesh. */
 	while (SkeletalMesh->GetLODNum() > Lods->Num()) {
+#if UE5_7_BEYOND
+		SkeletalMesh->RemoveSourceModel(SkeletalMesh->GetLODNum() - 1);
+#else
 		SkeletalMesh->RemoveLODInfo(SkeletalMesh->GetLODNum() - 1);
+#endif
 	}
 
 	/* Otherwise the build hands back the geometry it cached against the old source data */

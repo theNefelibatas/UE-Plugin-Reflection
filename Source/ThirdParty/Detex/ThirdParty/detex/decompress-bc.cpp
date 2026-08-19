@@ -212,7 +212,7 @@ uint32_t flags, uint8_t * DETEX_RESTRICT pixel_buffer) {
 	for (int i = 0; i < 16; i++) {
 		int pixel = (pixels >> (i * 2)) & 0x3;
 		int code = (alpha_bits >> (i * 3)) & 0x7;
-		int alpha;
+		int alpha = 0;
 		if (alpha0 > alpha1)
 			switch (code) {
 			case 0 : alpha = alpha0; break;

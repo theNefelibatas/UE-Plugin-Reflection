@@ -101,8 +101,17 @@ int32 ISkeletalMeshImporter::BuildMorphTargets(USkeletalMesh* SkeletalMesh, cons
 	for (int32 LodIndex = 0; LodIndex < ImportedModel->LODModels.Num(); ++LodIndex) {
 		if (!SkeletalMesh->HasMeshDescription(LodIndex)) continue;
 
+#if UE5_6_BEYOND
+		FSkeletalMeshImportData ImportData;
+		if (const FMeshDescription* MeshDescription = SkeletalMesh->GetMeshDescription(LodIndex)) {
+			if (!MeshDescription->IsEmpty()) {
+				ImportData = FSkeletalMeshImportData::CreateFromMeshDescription(*MeshDescription);
+			}
+		}
+#else
 		FSkeletalMeshImportData ImportData;
 		SkeletalMesh->LoadLODImportedData(LodIndex, ImportData);
+#endif
 
 		if (ImportData.Points.Num() == 0) continue;
 
@@ -164,7 +173,15 @@ int32 ISkeletalMeshImporter::BuildMorphTargets(USkeletalMesh* SkeletalMesh, cons
 			}
 		}
 
+#if UE5_6_BEYOND
+		FMeshDescription MeshDescription;
+		if (ImportData.GetMeshDescription(nullptr, &SkeletalMesh->GetLODInfo(LodIndex)->BuildSettings, MeshDescription)) {
+			SkeletalMesh->CreateMeshDescription(LodIndex, MoveTemp(MeshDescription));
+			SkeletalMesh->CommitMeshDescription(LodIndex);
+		}
+#else
 		SkeletalMesh->SaveLODImportedData(LodIndex, ImportData);
+#endif
 	}
 
 	return Written.Num();
@@ -391,7 +408,15 @@ bool ISkeletalMeshImporter::ApplyDna(USkeletalMesh* SkeletalMesh, const FString&
 	/* Behavior is what RigLogic runs a face with, geometry is what the editor updates the mesh
 	 * from. A cook keeps the first and leaves an empty stream where the second was, so the mesh
 	 * animates and the design time half is simply not there to rebuild. */
+#if UE5_8_BEYOND
+	TSharedPtr<IDNAReader> Behavior = ReadDNAFromBuffer(&Dna, EDNADataLayer::Behavior | EDNADataLayer::MachineLearnedBehavior | EDNADataLayer::Geometry, 0u);
+
+	if (!Behavior.IsValid()) {
+		Behavior = ReadDNAFromBuffer(&Dna, EDNADataLayer::Behavior | EDNADataLayer::MachineLearnedBehavior, 0u);
+	}
+#else
 	const TSharedPtr<IDNAReader> Behavior = ReadDNAFromBuffer(&Dna, EDNADataLayer::Behavior | EDNADataLayer::MachineLearnedBehavior, 0u);
+#endif
 
 	if (!Behavior.IsValid()) {
 		return false;
@@ -422,7 +447,11 @@ bool ISkeletalMeshImporter::ApplyDna(USkeletalMesh* SkeletalMesh, const FString&
 #else
 	DNAAsset->DnaFileName = SkeletalMesh->GetName() + TEXT(".dna");
 #endif
+#if UE5_8_BEYOND
+	DNAAsset->SetDNAReader(Behavior);
+#else
 	DNAAsset->SetBehaviorReader(Behavior);
+#endif
 
 	/* Some heads keep the DNA in a package of its own and only the definition with it: the names,
 	 * the hierarchy and the pose, and a behavior layer that is a stub. There is a DNA on the mesh
@@ -438,9 +467,11 @@ bool ISkeletalMeshImporter::ApplyDna(USkeletalMesh* SkeletalMesh, const FString&
 		);
 	}
 
+#if !UE5_8_BEYOND
 	if (const TSharedPtr<IDNAReader> Geometry = ReadDNAFromBuffer(&Dna, EDNADataLayer::Geometry, 0u)) {
 		DNAAsset->SetGeometryReader(Geometry);
 	}
+#endif
 
 	return true;
 #else
@@ -555,7 +586,11 @@ bool ISkeletalMeshImporter::AlignBindPoseToDna(USkeletalMesh* SkeletalMesh) {
 	UDNAAsset* DNAAsset = USkelMeshDNAUtils::GetMeshDNA(SkeletalMesh);
 	if (DNAAsset == nullptr) return false;
 
+#if UE5_8_BEYOND
+	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetDNAReader();
+#else
 	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetBehaviorReader();
+#endif
 	if (!Behavior.IsValid()) return false;
 
 	USkeleton* Skeleton = SkeletalMesh->GetSkeleton();
@@ -616,7 +651,11 @@ UPoseAsset* ISkeletalMeshImporter::BakeDnaPoseAsset(USkeletalMesh* SkeletalMesh)
 	UDNAAsset* DNAAsset = USkelMeshDNAUtils::GetMeshDNA(SkeletalMesh);
 	if (DNAAsset == nullptr) return nullptr;
 
+#if UE5_8_BEYOND
+	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetDNAReader();
+#else
 	const TSharedPtr<IDNAReader> Behavior = DNAAsset->GetBehaviorReader();
+#endif
 	if (!Behavior.IsValid()) return nullptr;
 
 	USkeleton* Skeleton = SkeletalMesh->GetSkeleton();

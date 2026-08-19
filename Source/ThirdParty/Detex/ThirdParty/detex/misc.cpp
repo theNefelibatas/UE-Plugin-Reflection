@@ -27,6 +27,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <strings.h>
 #else
 #define strncasecmp _strnicmp
+#define strdup _strdup
 #endif
 #include <stdarg.h>
 
