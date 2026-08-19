@@ -218,7 +218,11 @@ bool IStaticMeshImporter::Import() {
 #endif
 
 	/* Stops the build recomputing over the cooked screen sizes */
+#if UE5_7_BEYOND
+	StaticMesh->SetAutoComputeLODScreenSize(false);
+#else
 	StaticMesh->bAutoComputeLODScreenSize = false;
+#endif
 
 	BuildCollisionAndSockets(StaticMesh);
 

@@ -75,7 +75,11 @@ void TClothingData::Process(UObject* Object, const TArray<TSharedPtr<FJsonValue>
 		if (ClothingAsset == nullptr) continue;
 
 		ClothingAsset->Modify();
+#if UE5_8_BEYOND
+		ClothingAsset->UnbindFromSkeletalMesh(SkeletalMesh, INDEX_NONE, INDEX_NONE);
+#else
 		ClothingAsset->UnbindFromSkeletalMesh(SkeletalMesh);
+#endif
 	}
 
 	SkeletalMesh->GetMeshClothingAssets().Empty();

@@ -20,7 +20,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #ifndef __linux__
 
+#ifndef DETEX_INLINE_ONLY
 #define DETEX_INLINE_ONLY /* __attribute__((always_inline)) inline */
+#endif
 
 void detexConvertHalfFloatToFloat(uint16_t *source_buffer, int n, float *target_buffer);
 

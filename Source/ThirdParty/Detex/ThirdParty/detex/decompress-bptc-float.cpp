@@ -124,7 +124,7 @@ const uint8_t * DETEX_RESTRICT pixel_buffer) {
 		return false;
 	int32_t r[4], g[4], b[4];
 	int partition_set_id = 0;
-	int delta_bits_r, delta_bits_g, delta_bits_b;
+	int delta_bits_r = 0, delta_bits_g = 0, delta_bits_b = 0;
 	uint64_t data0 = block.data0;
 	uint64_t data1 = block.data1;
 	switch (mode) {
