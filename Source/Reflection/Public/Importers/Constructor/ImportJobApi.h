@@ -27,4 +27,12 @@ public:
 	 * caller; missing slots/materials are skipped. */
 	UFUNCTION(BlueprintCallable, Category = "Reflection")
 	static bool AttachMeshMaterials(const FString& MeshPath, const TMap<int32, FString>& SlotMaterials);
+
+	/* Builds a Texture2DArray asset at ArrayPath from already-imported layer textures
+	 * (package paths, slice order), driving the engine's own UTexture2DArrayFactory
+	 * (the Python binding cannot reach that factory), then saves the package. The
+	 * texture import pipeline stages layer textures and calls this to assemble them;
+	 * layer textures are left in place for the caller to clean up. */
+	UFUNCTION(BlueprintCallable, Category = "Reflection")
+	static bool BuildTexture2DArray(const FString& ArrayPath, const TArray<FString>& LayerTexturePaths);
 };
