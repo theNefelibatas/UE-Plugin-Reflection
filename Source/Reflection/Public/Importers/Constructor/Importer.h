@@ -24,11 +24,16 @@
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 
-/* [4.26] 	4.26 doesn't find the UMetaData header on it's own.
- * 			Let's help it out. */
-#if UE4_26
 #include "UObject/MetaData.h"
+
+/* Package metadata became UDEPRECATED_MetaData in UE 5.6. */
+inline bool IsPackageMetaDataObject(const UObject* Object) {
+#if UE5_6_BEYOND
+	return Object->IsA<UDEPRECATED_MetaData>();
+#else
+	return Object->IsA<UMetaData>();
 #endif
+}
 
 /* The file a package name lands on, if any. */
 inline bool PackageFileOf(const FString& LongPackageName, FString& OutFilename) {
@@ -55,7 +60,7 @@ inline bool PackageHoldsAsset(const FString& LongPackageName) {
 
 		for (const UObject* One : Inside) {
 			/* Every package carries one of these whether or not anything was built in it */
-			if (One != nullptr && !One->IsA<UMetaData>()) return true;
+			if (One != nullptr && !IsPackageMetaDataObject(One)) return true;
 		}
 
 		return false;

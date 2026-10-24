@@ -31,6 +31,7 @@
 #include "Engine/LODActor.h"
 #include "Engine/HLODProxy.h"
 #include "HLOD/HLODProxyDesc.h"
+#include "HLOD/HLODSetup.h"
 #include "HierarchicalLOD.h"
 
 /* [4.26] 	4.26 doesn't find the Importer header on it's own.
