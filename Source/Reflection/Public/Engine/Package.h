@@ -28,6 +28,7 @@
 #endif
 #include "VectorField/VectorFieldStatic.h"
 #include "UObject/ObjectRedirector.h"
+#include "UObject/StrongObjectPtr.h"
 
 #include "Utilities/ContentBrowser.h"
 #include "Utilities/Dialog.h"
@@ -136,6 +137,9 @@ inline void SavePackage(UPackage* Package) {
  * references and builds those too, and jumping to each of them walks the asset registry over every
  * object in memory while the ones further up this same stack are still half built. */
 inline bool HandleAssetCreation(UObject* Asset, UPackage* Package, const bool bBrowse = true) {
+	/* Keep the asset alive through editor callbacks without leaving it permanently rooted.
+	 * A strong reference also leaves any pre-existing root ownership untouched. */
+	const TStrongObjectPtr<UObject> KeepAsset(Asset);
 	{
 		/* User Failsafe.... */
 		const UPackage* AssetOutermostPackage = Asset->GetOutermost();
@@ -164,8 +168,6 @@ inline bool HandleAssetCreation(UObject* Asset, UPackage* Package, const bool bB
 	if (!Asset->IsA<UFontFace>() || FSlateApplication::IsInitialized()) {
 		Asset->PostEditChange();
 	}
-
-	Asset->AddToRoot();
 
 	Package->FullyLoad();
 

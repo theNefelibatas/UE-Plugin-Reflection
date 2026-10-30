@@ -6,6 +6,7 @@
 #include "Settings/ReflectionSettings.h"
 
 #include "Misc/MessageDialog.h"
+#include "UObject/StrongObjectPtr.h"
 
 /* ~~~~~~~~~~~~~ Templated Engine Classes ~~~~~~~~~~~~~ */
 #include "Engine/Log.h"
@@ -39,6 +40,8 @@ void IImporter::Save() const {
 
 bool IImporter::OnAssetCreation(UObject* Asset) const {
 	Validate(Asset);
+	/* Include saving in the lifetime protected from garbage collection. */
+	const TStrongObjectPtr<UObject> KeepAsset(Asset);
 
 	/* Jumped to only when nothing is waiting on this one. A reference met partway through another
 	 * import is built by a nested run, and the browser has no business following it. */
